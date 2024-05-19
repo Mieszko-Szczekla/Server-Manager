@@ -2,11 +2,16 @@ import configparser
 import LocalSystem
 from flask import Flask, jsonify, request
 from waitress import serve
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Cipher import AES
 
 KEY = b'_secret_example_'
 
 app = Flask(__name__)
 
+
+def encrypt(data):
+    return cipher.encrypt(pad(data, AES.block_size))
 
 @app.route('/is_installed', methods=['GET'])
 def get_is_installed():
@@ -16,7 +21,12 @@ def get_is_installed():
     result = str(LocalSystem.is_installed(package))
     return jsonify({'result': result})
 
+@app.route('/data', methods=['GET'])
+def get_data():
+    return cipher.encrypt(pad(b'random_data', AES.block_size))
+
 if __name__ == '__main__':
+    cipher = AES.new(KEY, AES.MODE_ECB)
     config_parser = configparser.RawConfigParser()
     config_path = './config.txt'
     config_parser.read(config_path)

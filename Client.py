@@ -1,5 +1,7 @@
 from requests import get
 import json
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Cipher import AES
 
 
 IP_ADDR = '172.25.84.29'
@@ -12,6 +14,10 @@ class RemoteMachine:
         self.host = host
         self.port = port
         self.name = f'http://{host}:{port}/'
+        self.cipher = AES.new(KEY, AES.MODE_ECB)
+
+    def decrypt(self, data):
+        return unpad(self.cipher.decrypt(data), AES.block_size)
 
     def is_installed(self, package):
         response = get(self.name+'is_installed', params = {'package': package})
@@ -21,6 +27,11 @@ class RemoteMachine:
         if content['result'] == 'Err':
             raise ValueError()
         return 'True' == content['result']
+    
+    def data(self):
+        response = get(self.name+'data')
+        content = unpad(self.cipher.decrypt(response.content), AES.block_size)
+        return content
 
 
 if __name__=='__main__': # test
@@ -29,3 +40,5 @@ if __name__=='__main__': # test
     print(rm.is_installed('tldr'))
     print(rm.is_installed('non-existent-package'))
     print(rm.is_installed('man-db'))
+
+    print(rm.data())
