@@ -1,4 +1,20 @@
 import configparser
+import LocalSystem
+from flask import Flask, jsonify, request
+from waitress import serve
+
+KEY = b'_secret_example_'
+
+app = Flask(__name__)
+
+
+@app.route('/is_installed', methods=['GET'])
+def get_is_installed():
+    package = request.args.get('package')
+    if package is None:
+        return jsonify({'result' : 'Err'})
+    result = str(LocalSystem.is_installed(package))
+    return jsonify({'result': result})
 
 if __name__ == '__main__':
     config_parser = configparser.RawConfigParser()
@@ -16,3 +32,4 @@ if __name__ == '__main__':
     except ValueError:
         print('Invalid config! Port number must be a number. See README!')
         exit(-1)
+    serve(app, host=host, port=port)
