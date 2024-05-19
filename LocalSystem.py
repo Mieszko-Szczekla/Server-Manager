@@ -30,12 +30,8 @@ def parse_command(command):
             cron.ls() # -> List[cron.task]
         case 'C':
             cron.add(command[1:]) # -> None
-        case 'R'
-            cron.remove(int(command[1:])) # -> None
-        
-        
-
-        
+        case 'R':
+            cron.remove(int(command[1:])) # -> None    
 
 def run(cmd):
     sub = subprocess.run(['echo'] + cmd.split(), stdout=subprocess.PIPE)
@@ -49,9 +45,11 @@ def is_installed(package):
 
 def install(package):
     sub = subprocess.run(['apt', 'install', '-y', package], stdout=-1, stderr=-1)
+    return (sub.returncode, sub.stdout)
 
 def purge(package):
     sub = subprocess.run(['apt', 'purge', '-y', package], stdout=-1, stderr=-1)
+    return (sub.returncode, sub.stdout)
 
 def parse_ls_line(line):
     # print(f'[LINE] {line=}')
@@ -79,6 +77,7 @@ def push(path):
     ...
 
 
-
-print(ls('/tmp/'))
+if __name__ == '__main__':
+    print(install('python3-pip'))
+    print(is_installed('tree'))
 
