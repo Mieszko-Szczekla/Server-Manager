@@ -64,7 +64,13 @@ class RemoteMachine:
     def is_installed(self, package):
         return rm.call_api_encrypted('is_installed', package = package)['result']
 
-    
+    def install(self, package):
+        response = rm.call_api_encrypted('install', package=package)
+        if response['success']:
+            return None
+        return (response['error_code'], response['stdout'])
+        
+        
 
 
 if __name__=='__main__': # test
@@ -75,3 +81,6 @@ if __name__=='__main__': # test
     print(rm.is_installed('tldr'))
     print(rm.is_installed('non-existent-package'))
     print(rm.is_installed('man-db'))
+
+    print(install('tree'))
+    print(install('papiez-polak'))

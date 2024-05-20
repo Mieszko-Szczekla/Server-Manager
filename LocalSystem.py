@@ -22,6 +22,9 @@ def ls(dir):
     cmd_res = subprocess.run(['ls', '-alh', dir], stdout=subprocess.PIPE).stdout
     return cmd_res.decode()
     
+def whoami():
+    return subprocess.run(['whoami'], stdout=subprocess.PIPE).stdout.decode().strip()
+
 def mkdir(path):
     ...
 
