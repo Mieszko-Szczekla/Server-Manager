@@ -1,29 +1,55 @@
 import configparser
 import LocalSystem
 from flask import Flask, jsonify, request
+import json
 from waitress import serve
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Cipher import AES
+from functools import reduce
+from operator import add
+from random import choices
+import string
 
 KEY = b'_secret_example_'
+function_container = []
 
 app = Flask(__name__)
 
 
-def encrypt(data):
+def encrypted(data):
     return cipher.encrypt(pad(data, AES.block_size))
 
+def decrypt_json(data):
+    return json.loads(unpad(cipher.decrypt(data), AES.block_size).decode())
+
+def encrypt_json(data):
+    return cipher.encrypt(pad(json.dumps(data).encode(), AES.block_size))
+
+def encrypted_traffic(func):
+    res = lambda: encrypt_json(func(**decrypt_json(request.data)))
+    res.__name__ = reduce(add, choices(string.ascii_letters, k=40), '')
+    return res
+
+@app.route('/ls', methods=['GET'])
+@encrypted_traffic
+def get_ls(path):
+    files = LocalSystem.ls(path)
+    print(files)
+    return {'result': files}
+
 @app.route('/is_installed', methods=['GET'])
-def get_is_installed():
+@encrypted_traffic
+def get_is_installed(package):
+    return {'result': LocalSystem.is_installed(package)}
+
+
+'''def get_is_installed():
     package = request.args.get('package')
     if package is None:
-        return jsonify({'result' : 'Err'})
-    result = str(LocalSystem.is_installed(package))
-    return jsonify({'result': result})
-
-@app.route('/data', methods=['GET'])
-def get_data():
-    return cipher.encrypt(pad(b'random_data', AES.block_size))
+        result = 'Err'
+    else:
+        result = str(LocalSystem.is_installed(package))
+    return encrypted(json.dumps({'result': result}).encode())'''
 
 if __name__ == '__main__':
     cipher = AES.new(KEY, AES.MODE_ECB)
