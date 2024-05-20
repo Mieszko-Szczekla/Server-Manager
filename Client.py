@@ -68,7 +68,13 @@ class RemoteMachine:
         response = rm.call_api_encrypted('install', package=package)
         if response['success']:
             return None
-        return (response['error_code'], response['stdout'])
+        return response['response_code']
+
+    def purge(self, package):
+        response = rm.call_api_encrypted('purge', package=package)
+        if not response['installed']:
+            return None
+        return response['response_code']
         
         
 
@@ -77,10 +83,14 @@ if __name__=='__main__': # test
     rm = RemoteMachine(IP_ADDR, PORT)
 
     print(rm.ls(path='/home/mieszko/Desktop'))
-    print(rm.is_installed('tree'))
-    print(rm.is_installed('tldr'))
-    print(rm.is_installed('non-existent-package'))
-    print(rm.is_installed('man-db'))
+    print(rm.is_installed('tldr'), 'should be True')
+    print(rm.is_installed('non-existent-package'), 'should be False')
+    print(rm.is_installed('man-db'), 'should be True')
 
-    print(install('tree'))
-    print(install('papiez-polak'))
+    print(rm.install('tree'), 'should be None')
+    print(rm.install('non-existent-package'), 'should be 100')
+    print(rm.is_installed('tree'), 'should be True')
+
+    print(rm.purge('tree'), 'should be None')
+    print(rm.purge('non-existent-package'), 'should be None')
+    print(rm.is_installed('tree'), 'should be False')
