@@ -28,8 +28,9 @@ def encrypt_json(data):
 def encrypted_traffic(func):
     def res(): 
         kwargs = decrypt_json(request.data)
-        print(f'{func.__name__}({kwargs=})')
-        return encrypt_json(func(**kwargs))
+        result = func(**kwargs)
+        print(f'{func.__name__}({kwargs}) -> {result}')
+        return encrypt_json(result)
     res.__name__ = 'encrypted_'+func.__name__#reduce(add, choices(string.ascii_letters, k=40), '')
     return res
 
@@ -54,6 +55,43 @@ def get_install(package):
 def get_purge(package):
     response_code, stdout = LocalSystem.purge(package)
     return {'response_code': response_code, 'installed': LocalSystem.is_installed(package)}
+
+@app.route('/rm', methods=['GET'])
+@encrypted_traffic
+def get_rm(path):
+    return {'response_code': LocalSystem.rm(path)}
+
+@app.route('/mkdir', methods=['GET'])
+@encrypted_traffic
+def get_mkdir(path):
+    return {'response_code': LocalSystem.mkdir(path)}
+
+@app.route('/hostname_get', methods=['GET'])
+@encrypted_traffic
+def get_hostname_get():
+    return {'hostname': LocalSystem.get_hostname()}
+
+@app.route('/hostname_set', methods=['GET'])
+@encrypted_traffic
+def get_hostname_set(hostname):
+    return {'response_code': LocalSystem.set_hostname(hostname)}
+
+@app.route('/user_list', methods=['GET'])
+@encrypted_traffic
+def get_user_list():
+    return {'result': LocalSystem.user_list()}
+
+@app.route('/user_del', methods=['GET'])
+@encrypted_traffic
+def get_user_del(username):
+    return {'success': LocalSystem.user_del(username)}
+
+@app.route('/user_add', methods=['GET'])
+@encrypted_traffic
+def get_user_add(username):
+    return {'success': LocalSystem.user_add(username)}
+
+
 
 if __name__ == '__main__':
     if LocalSystem.whoami() != 'root':

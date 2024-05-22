@@ -18,6 +18,14 @@ def purge(package):
     sub = subprocess.run(['apt', 'purge', '-y', package], stdout=-1, stderr=-1)
     return (sub.returncode, sub.stdout)
 
+def get_hostname():
+    return subprocess.run(['hostname'], stdout=-1, stderr=-1).stdout.decode().strip()
+
+def set_hostname(new_name):
+    tmp = subprocess.run(['hostname', f'"{new_name}"'], stdout=-1, stderr=-1)
+    print(tmp.stdout.decode(), tmp.stderr.decode(), f'hostname "{new_name}"')
+    return tmp.returncode
+
 def ls(dir):
     cmd_res = subprocess.run(['ls', '-alh', dir], stdout=subprocess.PIPE).stdout
     return cmd_res.decode()
@@ -26,13 +34,26 @@ def whoami():
     return subprocess.run(['whoami'], stdout=subprocess.PIPE).stdout.decode().strip()
 
 def mkdir(path):
-    ...
+    return subprocess.run(['mkdir', '-p', path], stdout=-1, stderr=-1).returncode
 
-def push(path):
-    ...
+def rm(path):
+    return subprocess.run(['rm', '-rf', path], stdout=-1, stderr=-1).returncode
 
+def users_list():
+    def read_log(log):
+        parts = log.split(':')
+        if parts[-1] not in ('/usr/sbin/nologin', '/bin/false', '/bin/sync'):
+            return parts[0]
+    response = subprocess.run(['cat', '/etc/passwd'], stdout=-1, stderr=-1).stdout.decode()
+    return list(filter(lambda x: x is not None, map(read_log, response.split('\n')[:-1])))
+    
+def add_user(username):
+    return subprocess.run(['useradd', '--create-home', username], stdout=-1, stderr=-1).returncode == 0
+  
+def del_user(username):
+    return subprocess.run(['userdel', '--remove', username], stdout=-1, stderr=-1).returncode == 0
 
 if __name__ == '__main__':
-    print(install('python3-pip'))
-    print(is_installed('tree'))
+    print(del_user('user2137'))
+    print(users_list())
 
