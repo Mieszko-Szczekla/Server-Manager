@@ -21,10 +21,9 @@ def purge(package):
 def get_hostname():
     return subprocess.run(['hostname'], stdout=-1, stderr=-1).stdout.decode().strip()
 
-def set_hostname(new_name):
-    tmp = subprocess.run(['hostname', f'"{new_name}"'], stdout=-1, stderr=-1)
-    print(tmp.stdout.decode(), tmp.stderr.decode(), f'hostname "{new_name}"')
-    return tmp.returncode
+def set_hostname(new_name) -> int:
+    return subprocess.run(['hostnamectl', 'set-hostname', f'{new_name}'], stdout=-1, stderr=-1).returncode
+    
 
 def ls(dir):
     cmd_res = subprocess.run(['ls', '-alh', dir], stdout=subprocess.PIPE).stdout
@@ -39,7 +38,7 @@ def mkdir(path):
 def rm(path):
     return subprocess.run(['rm', '-rf', path], stdout=-1, stderr=-1).returncode
 
-def users_list():
+def user_list():
     def read_log(log):
         parts = log.split(':')
         if parts[-1] not in ('/usr/sbin/nologin', '/bin/false', '/bin/sync'):

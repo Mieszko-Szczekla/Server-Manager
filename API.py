@@ -84,12 +84,12 @@ def get_user_list():
 @app.route('/user_del', methods=['GET'])
 @encrypted_traffic
 def get_user_del(username):
-    return {'success': LocalSystem.user_del(username)}
+    return {'success': LocalSystem.del_user(username)}
 
 @app.route('/user_add', methods=['GET'])
 @encrypted_traffic
 def get_user_add(username):
-    return {'success': LocalSystem.user_add(username)}
+    return {'success': LocalSystem.add_user(username)}
 
 
 

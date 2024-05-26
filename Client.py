@@ -8,7 +8,7 @@ from operator import add
 from bs4 import BeautifulSoup
 
 
-IP_ADDR = '192.168.64.13'
+IP_ADDR = '192.168.122.27'
 PORT = 2137
 KEY = b'_secret_example_'
 
@@ -92,13 +92,13 @@ class RemoteMachine:
         fset= lambda self, new_hostname: self.call_api_encrypted('hostname_set', hostname = new_hostname)
     )
     
-    def user_list():
+    def user_list(self):
         return self.call_api_encrypted('user_list')['result']
         
-    def user_add(username):
+    def user_add(self, username):
         return self.call_api_encrypted('user_add', username=username)['success']
 
-    def user_del(username):
+    def user_del(self, username):
         return self.call_api_encrypted('user_del', username=username)['success']
 
         
@@ -120,7 +120,8 @@ if __name__=='__main__': # test
     print(rm.purge('non-existent-package'), 'should be None')
     print(rm.is_installed('tree'), 'should be False')
     '''
-    print(RemoteMachine.package_info('firefox-esr'))
+    # print(RemoteMachine.package_info('firefox-esr'))
+    rm.hostname = 'vm'
     while(True):
         try:
             print(eval(input('>> ')))
