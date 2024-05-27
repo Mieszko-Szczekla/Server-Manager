@@ -28,11 +28,19 @@ def encrypt_json(data):
 def encrypted_traffic(func):
     def res(): 
         kwargs = decrypt_json(request.data)
+        if not kwargs.pop('valid', False):
+            return {'error': 'Invalid request'}
         result = func(**kwargs)
+        result['valid'] = True
         print(f'{func.__name__}({kwargs}) -> {result}')
         return encrypt_json(result)
     res.__name__ = 'encrypted_'+func.__name__#reduce(add, choices(string.ascii_letters, k=40), '')
     return res
+
+@app.route('/echo', methods=['GET'])
+@encrypted_traffic
+def get_echo():
+    return {}
 
 @app.route('/ls', methods=['GET'])
 @encrypted_traffic
@@ -91,7 +99,11 @@ def get_user_del(username):
 def get_user_add(username):
     return {'success': LocalSystem.add_user(username)}
 
-
+@app.route('/passwd', methods=['GET'])
+@encrypted_traffic
+def get_passwd(username, password):
+    LocalSystem.passwd(username, password)
+    return {}
 
 if __name__ == '__main__':
     if LocalSystem.whoami() != 'root':

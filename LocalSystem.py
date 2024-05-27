@@ -38,6 +38,9 @@ def mkdir(path):
 def rm(path):
     return subprocess.run(['rm', '-rf', path], stdout=-1, stderr=-1).returncode
 
+def passwd(user, password):
+    subprocess.Popen(['passwd', user], stdin=subprocess.PIPE, stdout = subprocess.PIPE, stderr = subprocess.PIPE).communicate(input=f'{password}\n{password}'.encode())
+
 def user_list():
     def read_log(log):
         parts = log.split(':')
