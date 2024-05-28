@@ -5,16 +5,14 @@ import json
 from waitress import serve
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Cipher import AES
+from Crypto.Hash import SHA256
 from functools import reduce
 from operator import add
 from random import choices
 import string
-
-KEY = b'_secret_example_'
-function_container = []
+import os
 
 app = Flask(__name__)
-
 
 def encrypted(data):
     return cipher.encrypt(pad(data, AES.block_size))
@@ -45,7 +43,7 @@ def get_echo():
 @app.route('/ls', methods=['GET'])
 @encrypted_traffic
 def get_ls(path):
-    return {'result': LocalSystem.ls(path)}
+    return {'is_dir':os.path.isdir(path), 'result': LocalSystem.ls(path)}
 
 @app.route('/is_installed', methods=['GET'])
 @encrypted_traffic
@@ -105,18 +103,41 @@ def get_passwd(username, password):
     LocalSystem.passwd(username, password)
     return {}
 
+@app.route('/set_path')
+
+def remove_padding(text):
+    while(text[-1] == '/'):
+        text = text[:-1]
+    return text
+
+@app.route('/push', methods=['GET'])
+def get_push():
+    data = unpad(cipher.decrypt(request.data), AES.block_size)
+    path = remove_padding(data[:4096].decode())
+    filecontent = data[4096:]
+
+    with open(path, 'wb') as file:
+        file.write(filecontent)
+    LocalSystem.permit_access(path)
+    return ''
+
+@app.route('/pull', methods=['GET'])
+def get_pull():
+    path = unpad(cipher.decrypt(request.data), AES.block_size).decode()
+    with open(path, 'rb') as file:
+        return cipher.encrypt(pad(file.read(), AES.block_size))
+
 if __name__ == '__main__':
     if LocalSystem.whoami() != 'root':
         print('You must run this software as root!')
         exit(-1)
-    cipher = AES.new(KEY, AES.MODE_ECB)
     config_parser = configparser.RawConfigParser()
     config_path = './config.txt'
     config_parser.read(config_path)
     if 'SERVER' not in config_parser:
         print(f'Invalid config! Ensure that file "{config_path}" exists and see README!')
         exit(-2)
-    if 'Host' not in config_parser['SERVER'] and 'PortNumber' not in config_parser['SERVER']:
+    if 'Host' not in config_parser['SERVER'] or 'PortNumber' not in config_parser['SERVER'] or 'Password' not in config_parser['SERVER']:
         print('Invalid config! See README!')
         exit(-2)
     host = config_parser['SERVER']['Host']
@@ -125,4 +146,7 @@ if __name__ == '__main__':
     except ValueError:
         print('Invalid config! Port number must be a number. See README!')
         exit(-2)
+    password = config_parser['SERVER']['Password'].strip()
+
+    cipher = AES.new(SHA256.new(data=password.encode()).digest()[:16], AES.MODE_ECB)
     serve(app, host=host, port=port)
