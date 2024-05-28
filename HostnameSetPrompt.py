@@ -1,11 +1,10 @@
 from PySide6 import QtCore, QtWidgets
-from ClientTest import RemoteMachine
 import re
 
 REGEX_VALID_HOSTNAME = re.compile(r'^([a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])$')
 
 
-def is_valid(hostname): # TODO implement check
+def is_valid(hostname):
     return REGEX_VALID_HOSTNAME.match(hostname) is not None
 
 class HostnameSetPrompt(QtWidgets.QWidget):
