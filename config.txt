@@ -1,3 +1,9 @@
 [SERVER]
-Host = 172.25.84.29
-PortNumber = 2137
+Host = 192.168.64.13
+PortNumber = 213
+Password = password123
+
+[CLIENT]
+Host = 192.168.64.13
+PortNumber = 213
+Password = password123
