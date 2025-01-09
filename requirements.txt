@@ -2,3 +2,5 @@ Flask==3.0.3
 pycryptodome==3.20.0
 requests==2.31.0
 waitress==3.0.0
+PySide6==6.8.1.1
+bs4==0.0.2

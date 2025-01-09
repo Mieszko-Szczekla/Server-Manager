@@ -1,7 +1,7 @@
 import sys
 from PySide6 import QtCore, QtWidgets
-from LoginPrompt import LoginPrompt
-from Menu import Menu
+from Views.LoginPrompt import LoginPrompt
+from Views.Menu import Menu
 
 class App:
     def __init__(self):

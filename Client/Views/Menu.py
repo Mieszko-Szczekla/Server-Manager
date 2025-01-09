@@ -1,8 +1,8 @@
 from PySide6 import QtCore, QtWidgets
-from HostnameSetPrompt import HostnameSetPrompt
-from UsersManager import UsersManager
-from SoftwareManager import SoftwareManager
-from FileExplorer import FileExplorer
+from Views.HostnameSetPrompt import HostnameSetPrompt
+from Views.UsersManager import UsersManager
+from Views.SoftwareManager import SoftwareManager
+from Views.FileExplorer import FileExplorer
 
 class Menu(QtWidgets.QWidget):
     def __init__(self, app):
